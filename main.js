@@ -56,6 +56,13 @@ http.createServer(function (req, res)
             }
           });
           break;
+        case '/next':
+          var current = db.collection("current");
+          current.update({ id: 1 }, { $inc: { current: 1 } }
+          );
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{ "status": "success" }');
+          break;
         default: break;
       }
     }
