@@ -60,8 +60,23 @@ http.createServer(function (req, res)
           var current = db.collection("current");
           current.update({ id: 1 }, { $inc: { current: 1 } }
           );
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end('{ "status": "success" }');
+          var current = db.collection("current");
+          var filter = {};
+          current.find(filter).toArray(function (error, documents)
+          {
+            if (error)
+              console.log("Error: ", error);
+            else
+            {
+              documents.forEach(function (doc)
+              {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end('{ "status": "success","current":"' + doc.current + '"}');
+              });
+            }
+          });
+          /* res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{ "status": "success" }'); */
           break;
         default: break;
       }
