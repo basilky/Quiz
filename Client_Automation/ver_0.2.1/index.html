@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <style>
+            #textbox{
+                margin: 10px;
+                padding: 10px;
+                width: 97%;
+            }
+        </style>
+    </head>
+    <body>
+    <div>
+        <form  >
+        <label style="padding-left:10px;" for="textbox"><b>ENTER TEAMS NAME :</b></label>
+        <input id="textbox" type="text" name="teamname">
+        <input type="button" onclick="check_conflict()" value="submit">
+        </form>
+    </div>
+    </body>
+    <script>
+        function check_conflict(){
+            var xhr = new XMLHttpRequest();
+            var url = "/join_check";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var result = JSON.parse(xhr.responseText);
+                    alert(result.text);
+                    if(result.join=="true")
+                    {
+                        localStorage.setItem("team",JSON.stringify({"teamname" : document.getElementById("textbox").value,"score" : "0","last_question_time":0}));
+                        window.location=result.redirect;
+                    }
+                }
+            };
+            var sample = document.getElementById("textbox").value;
+            var data = JSON.stringify({"teamname": sample});
+            xhr.send(data);
+        }
+    </script>
+</html>

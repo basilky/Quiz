@@ -1,0 +1,68 @@
+<html>
+    <body>
+        <div id="show_teams" style="border: 2px solid red;height:10%;width:40%;margin-top:10%;margin-left:28%;overflow-y: scroll;">
+
+        </div>
+        <button id="start_button" onclick="start_test()" style="padding:10px;color:green;margin-left:45%;margin-top:6%">Start Test</button>
+        <div id="question" style="width:80%;display:inline-block">
+
+        </div>
+        <div style="float:right;"><b id="timer" style="color:red;font-size: 50px"></b></div>
+        <script>
+            var time_remain = 0;
+            document.getElementById("question").style.display = "none";
+            document.getElementById("timer").style.display = "none";
+            function start_timer(x){
+                time_remain = x;
+                document.getElementById("timer").style.display = "inline-block";
+                setInterval(function(){
+                    time_remain--;
+                    document.getElementById("timer").innerHTML = time_remain;
+                    if(time_remain==0)
+                    {
+                        alert("Times Up!"); 
+                        location.reload();
+                    }   
+                },1000);
+            }
+            function start_test()
+            {
+                //timer for initial question
+                start_timer(10);
+                document.getElementById("question").style.display = "inline-block";
+                document.getElementById("start_button").style.display = "none";
+                document.getElementById("show_teams").style.display = "none";
+            }
+            function httpGet(theUrl)
+            {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", theUrl, false );
+                xmlHttp.send( null );
+                return JSON.parse(xmlHttp.responseText);
+            }
+            function check_answer(answer)
+            {
+                if(answer == question[0].options.indexOf(question[0].answer))
+                {
+                    var team = JSON.parse(localStorage.getItem("team"));
+                    var xhr = new XMLHttpRequest();
+                    var url = "update_score";
+                    xhr.open("POST", url, true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    var data = {"teamname": team.teamname ,"time_remain": time_remain};
+                    xhr.send(JSON.stringify(data));
+                }
+                else 
+                {
+                    console.log("Wrong answer");
+                }
+            }
+            var question = httpGet("/get_question");
+            document.getElementById("question").innerHTML = "<b style='color:red;'>"+question[0].question+"</b></br>";
+            for(var i=0;i < 4;i++)
+            {
+                    document.getElementById("question").innerHTML += "<br><button onclick='check_answer("+i+")'>"+question[0].options[i]+"</button><br>"; 
+            }
+        </script>
+    </body>
+</html>
