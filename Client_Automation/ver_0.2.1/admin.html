@@ -1,0 +1,17 @@
+<html>
+    <body>
+        <button id="give_score" style="margin-top:20%;margin-left:45%;padding:10px;color:red" onclick="give_score()">Update Score</button>
+    </body>
+    <script>
+        function give_score(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText.toString());
+                }
+            };
+            xhttp.open("POST", "/update_score", true);
+            xhttp.send();
+        }    
+    </script>
+</html>

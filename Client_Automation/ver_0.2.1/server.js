@@ -20,8 +20,19 @@ app.get("/test",function(request,response){
   response.sendFile("/home/vimal974ever/Desktop/Kahoot/ver_0.2/test.html");
 });
 
-app.get('/teams_list',function(request,response){
-  response.sendFile("/home/vimal974ever/Desktop/Kahoot/ver_0.2/index.html");
+app.get('/get_team_list',function(request,response){
+    MongoClient.connect(url,{ useNewUrlParser: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("kahoot");
+    dbo.collection("team").find({}).toArray(function(err, result) {
+      if (err) throw err;
+      db.close();
+      if(result.length!=0)
+      {
+        response.send(JSON.stringify(result));
+      }
+      });
+    });
 });
 
 app.get("/get_question",function(request,response){
@@ -40,23 +51,94 @@ app.get("/get_question",function(request,response){
     });
 });
 
+app.get("/admin",function(request,response){
+    response.sendFile("/home/vimal974ever/Desktop/Kahoot/ver_0.2/admin.html");
+})
+
 app.post("/update_score",urlencodedParser,function(request,response){
+    MongoClient.connect(url,{ useNewUrlParser: true}, function(err,db){
+      if(err) throw err;
+      var dbo = db.db("kahoot");
+      dbo.collection("team").find({}).toArray(function(err, result1) {
+        if (err) throw err;
+        result1.sort(function(a, b){
+          return a.last_question_time-b.last_question_time;
+        })
+        //For 1st prize
+        var myquery1 = { teamname: result1[result1.length-1].teamname };
+        dbo.collection("team").find(myquery1).toArray(function(err, result) {
+          var old_score = 0;
+          old_score1 = result[0].score;
+          newvalues1 = { $set: { score : old_score1 + 1000 } };
+          // console.log(result1[result1.length-1].teamname+" scored 1000 points from "+old_score);
+          
+
+          MongoClient.connect(url,{ useNewUrlParser: true }, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("kahoot");
+            dbo.collection("team").updateOne(myquery1, newvalues1, function(err, res) {
+            if (err) throw err;
+            console.log("\n----------------------------\n");
+            console.log(JSON.stringify(newvalues1) + " for " + myquery1.teamname);
+            });
+          });
+        });
+        var myquery2 = { teamname: result1[result1.length-2].teamname };
+        dbo.collection("team").find(myquery2).toArray(function(err, result) {
+          var old_score2 = 0;
+          old_score2 = result[0].score;
+          newvalues2 = { $set: { score : old_score2 + 500 } };
+          // console.log(result1[result1.length-2].teamname+" scored 500 points from "+old_score);
+
+          MongoClient.connect(url,{ useNewUrlParser: true }, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("kahoot");
+            dbo.collection("team").updateOne(myquery2, newvalues2, function(err, res) {
+            if (err) throw err;
+            console.log(JSON.stringify(newvalues2) + " for " + myquery2.teamname);
+            });
+          });
+        });
+
+        var myquery3 = { teamname: result1[result1.length-3].teamname };
+        dbo.collection("team").find(myquery3).toArray(function(err, result) {
+          var old_score3 = 0;
+          old_score3 = result[0].score;
+          newvalues3 = { $set: { score : old_score3 + 250 } };
+          // console.log(result1[result1.length-3].teamname+" scored 250 points from "+old_score);
+          
+
+          MongoClient.connect(url,{ useNewUrlParser: true }, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("kahoot");
+            dbo.collection("team").updateOne(myquery3, newvalues3, function(err, res) {
+            if (err) throw err;
+            console.log(JSON.stringify(newvalues3) + " for " + myquery3.teamname);
+            console.log("\n----------------------------\n");
+            });
+          });
+        });
+        dbo.collection("team").updateMany({},{ $set: { last_question_time : 0 } },function(err,res){
+          if (err) throw err;
+        })
+        db.close();
+        });
+    })
+});
+
+app.post("/submit_score",urlencodedParser,function(request,response){
     result=JSON.parse(JSON.stringify(request.body));
     MongoClient.connect(url,{ useNewUrlParser: true }, function(err, db) {
       if (err) throw err;
       var dbo = db.db("kahoot");
       var myquery = { teamname: result.teamname };
-      var new_score = 1;
       var time_remain = result.time_remain;
-      dbo.collection("team").find(myquery).toArray(function(err, result){
-        var old_score = result[0].score;
-        var newvalues = { $set: { score: old_score + new_score , last_question_time : time_remain } };
-        dbo.collection("team").updateOne(myquery, newvalues, function(err, res) {
-        if (err) throw err;
-        db.close();
-        console.log("Team "+result[0].teamname+" submitted in "+(10-time_remain+"s"))
-        // console.log("Result updated for "+JSON.stringify(myquery)+" to "+JSON.stringify(newvalues));
-        });
+      var newvalues = { $set: { last_question_time : time_remain } };
+      dbo.collection("team").updateOne(myquery, newvalues, function(err, res) {
+      if (err) throw err;
+      db.close();
+      console.log("Team "+result.teamname+" submitted in "+(10-time_remain+"s"));
+      // console.log("Result updated for "+JSON.stringify(myquery)+" to "+JSON.stringify(newvalues));
       });
     });
 });

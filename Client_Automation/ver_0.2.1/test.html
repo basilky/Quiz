@@ -1,5 +1,5 @@
 <html>
-    <body>
+    <body onload="get_team_list()">
         <div id="show_teams" style="border: 2px solid red;height:10%;width:40%;margin-top:10%;margin-left:28%;overflow-y: scroll;">
 
         </div>
@@ -12,6 +12,11 @@
             var time_remain = 0;
             document.getElementById("question").style.display = "none";
             document.getElementById("timer").style.display = "none";
+            function get_team_list(){
+                var teams = httpGet("/get_team_list");
+                console.log(teams);
+                //document.getElementById("show_teams").
+            }
             function start_timer(x){
                 time_remain = x;
                 document.getElementById("timer").style.display = "inline-block";
@@ -46,7 +51,7 @@
                 {
                     var team = JSON.parse(localStorage.getItem("team"));
                     var xhr = new XMLHttpRequest();
-                    var url = "update_score";
+                    var url = "submit_score";
                     xhr.open("POST", url, true);
                     xhr.setRequestHeader("Content-Type", "application/json");
                     var data = {"teamname": team.teamname ,"time_remain": time_remain};
