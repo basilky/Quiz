@@ -4,7 +4,7 @@ var url = require('url');
 http.createServer(function (req, res)
 {
   var mongoClient = require("mongodb").MongoClient;
-  var server = "mongodb://localhost:27017/kahoot";
+  var server = "mongodb://localhost:27017/fossart";
   mongoClient.connect(server, function (error, db)
   {
     if (error)
@@ -58,7 +58,7 @@ http.createServer(function (req, res)
           break;
         case '/next':
           var current = db.collection("current");
-          current.update({ id: 1 }, { $inc: { current: 1 } }
+          current.update({}, { $inc: { current: 1 } }
           );
           var current = db.collection("current");
           var filter = {};
@@ -82,5 +82,5 @@ http.createServer(function (req, res)
       }
     }
   });
-}).listen(8080, 'playground.vm');
-console.log('Server running at http://localhost:8080/');
+}).listen(3000);
+console.log('Server running at http://localhost:3000/');
